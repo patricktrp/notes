@@ -1,13 +1,11 @@
-package dev.treppmann.notes;
+package dev.treppmann.deepnote;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NotesApplication {
-
+public class DeepNoteApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(NotesApplication.class, args);
+		SpringApplication.run(DeepNoteApplication.class, args);
 	}
-
 }

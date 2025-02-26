@@ -2,10 +2,31 @@ services:
   pgvector:
     image: 'pgvector/pgvector:pg16'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=notes'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
     labels:
       - "org.springframework.boot.service-connection=postgres"
     ports:
       - '5432'
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+      - ./dev-environment/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  keycloak:
+    image: 'keycloak/keycloak:26.0'
+    command: start-dev
+    environment:
+      - 'KC_DB=postgres'
+      - 'KC_DB_URL=jdbc:postgresql://pgvector:5432/keycloak'
+      - 'KC_DB_USERNAME=postgres'
+      - 'KC_DB_PASSWORD=postgres'
+      - 'KEYCLOAK_ADMIN=admin'
+      - 'KEYCLOAK_ADMIN_PASSWORD=admin'
+    ports:
+      - '8088:8080'
+    depends_on:
+      - pgvector
+
+volumes:
+  pgvector_data:
