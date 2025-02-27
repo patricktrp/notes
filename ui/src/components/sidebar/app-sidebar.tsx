@@ -1,5 +1,13 @@
 import * as React from "react";
-import { ChevronRight, File, Folder, Sparkles, Search } from "lucide-react";
+import {
+  ChevronRight,
+  File,
+  Folder,
+  Sparkles,
+  Search,
+  BrainCircuit,
+  Settings,
+} from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,11 +24,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarRail,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { NavMain } from "@/components/sidebar/nav-main";
+import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavUser } from "@/components/sidebar/nav-user";
 
 const data = {
+  user: {
+    name: "Patrick Treppmann",
+    email: "patrick@treppmann.dev",
+    avatar: "/avatars/shadcn.jpg",
+  },
   navMain: [
     {
       title: "Search",
@@ -52,37 +67,38 @@ const data = {
     ],
     ["lib", ["util.ts"]],
     ["public", "favicon.ico", "vercel.svg"],
-    // ".eslintrc.json",
-    // ".gitignore",
-    // "next.config.js",
-    // "tailwind.config.js",
-    // "package.json",
     "README.md",
+  ],
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings,
+    },
   ],
 };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <BrainCircuit className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">DeepNote</span>
+                  <span className="truncate text-xs">Free</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarContent>
-        {/* <SidebarGroup>
-          <SidebarGroupLabel>Changes</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {data.changes.map((item, index) => (
-                <SidebarMenuItem key={index}>
-                  <SidebarMenuButton>
-                    <File />
-                    {item.file}
-                  </SidebarMenuButton>
-                  <SidebarMenuBadge>{item.state}</SidebarMenuBadge>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> */}
         <SidebarGroup>
           <SidebarGroupLabel>Notes</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -94,7 +110,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
+      {/* <SidebarRail /> */}
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
     </Sidebar>
   );
 }
