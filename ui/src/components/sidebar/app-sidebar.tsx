@@ -41,11 +41,13 @@ const data = {
       title: "Search",
       url: "#",
       icon: Search,
+      shortcut: "S",
     },
     {
       title: "Ask AI",
       url: "#",
       icon: Sparkles,
+      shortcut: "A",
     },
   ],
   tree: [
@@ -69,6 +71,62 @@ const data = {
     ["public", "favicon.ico", "vercel.svg"],
     "README.md",
   ],
+  newTree: {
+    folders: [
+      {
+        id: 1,
+        name: "Test",
+        folders: [
+          {
+            id: 4,
+            name: "Test 4",
+            folders: [
+              {
+                id: 5,
+                name: "Test 5",
+                folders: [],
+                notes: [
+                  {
+                    id: 4,
+                    title: "Testo",
+                  },
+                ],
+              },
+            ],
+            notes: [],
+          },
+        ],
+        notes: [],
+      },
+      {
+        id: 2,
+        name: "Test 2",
+        folders: [],
+        notes: [],
+      },
+      {
+        id: 3,
+        name: "Test 3",
+        folders: [],
+        notes: [
+          {
+            id: 3,
+            title: "Second Note",
+          },
+        ],
+      },
+    ],
+    notes: [
+      {
+        id: 1,
+        title: "First Note",
+      },
+      {
+        id: 2,
+        title: "Second Note",
+      },
+    ],
+  },
   navSecondary: [
     {
       title: "Settings",
@@ -77,6 +135,7 @@ const data = {
     },
   ],
 };
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
@@ -90,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">DeepNote</span>
-                  <span className="truncate text-xs">Free</span>
+                  <span className="truncate text-xs">Pro</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -112,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       {/* <SidebarRail /> */}
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );
@@ -123,7 +182,7 @@ function Tree({ item }: { item: string | any[] }) {
   if (!items.length) {
     return (
       <SidebarMenuButton
-        isActive={name === "button.tsx"}
+        // isActive={name === "button.tsx"}
         className="data-[active=true]:bg-transparent"
       >
         <File />
@@ -135,7 +194,7 @@ function Tree({ item }: { item: string | any[] }) {
     <SidebarMenuItem>
       <Collapsible
         className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-        defaultOpen={name === "components" || name === "ui"}
+        // defaultOpen={name === "components" || name === "ui"}
       >
         <CollapsibleTrigger asChild>
           <SidebarMenuButton>
