@@ -1,4 +1,4 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.dto;
 
 import java.util.List;
 

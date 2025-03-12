@@ -1,4 +1,4 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

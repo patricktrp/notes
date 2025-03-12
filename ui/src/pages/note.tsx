@@ -1,9 +1,4 @@
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
@@ -11,11 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { Outlet } from "react-router";
 import { NavActions } from "@/components/layout/nav-actions";
-import { SettingsDialog } from "@/components/features/settings/settings-dialog";
+import { useParams } from "react-router";
+import { useNote } from "@/hooks/use-note";
 
 const Note = () => {
+  const { noteId } = useParams<{ noteId: string }>();
+  const { data, isLoading, isError, error } = useNote(Number(noteId));
+
   return (
     <div>
       <header className="flex h-14 shrink-0 items-center gap-2">
@@ -26,7 +24,7 @@ const Note = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbPage className="line-clamp-1">
-                  Project Management
+                  {data?.title}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -34,7 +32,7 @@ const Note = () => {
         </div>
         <div className="ml-auto px-3">{<NavActions />}</div>
       </header>
-      <div className="p-4">NOTE</div>
+      <div className="p-4">{data?.content}</div>
     </div>
   );
 };

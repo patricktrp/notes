@@ -1,4 +1,10 @@
 import apiClient from "./axios-instance";
+import { Note } from "@/types/types";
+
+const fetchNoteById = async (noteId: number): Promise<Note> => {
+  const res = await apiClient.get(`/notes/${noteId}`);
+  return res.data;
+};
 
 const fetchFolderTree = async () => {
   const res = await apiClient.get("/folders/tree");
@@ -12,7 +18,6 @@ const moveNote = async ({
   noteId: number;
   newFolderId: number;
 }) => {
-  console.log("API....");
   const response = await apiClient.put(`/notes/${noteId}/move`, null, {
     params: { folderId: newFolderId },
   });
@@ -30,4 +35,4 @@ const moveFolder = async (folderId: number, newFolderId: number) => {
   return response.data;
 };
 
-export { fetchFolderTree, moveNote, moveFolder };
+export { fetchNoteById, fetchFolderTree, moveNote, moveFolder };

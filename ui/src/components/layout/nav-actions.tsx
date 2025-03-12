@@ -34,6 +34,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { formatDate } from "@/lib/date-utils";
 
 const data = [
   [
@@ -105,10 +106,12 @@ export function NavActions() {
     setIsOpen(true);
   }, []);
 
+  const updatedAt = "2025-03-12T13:44:06.714977Z";
+
   return (
     <div className="flex items-center gap-2 text-sm">
       <div className="hidden font-medium text-muted-foreground md:inline-block">
-        Edit Oct 08
+        Edit {formatDate(updatedAt)}
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7">
         <Star />

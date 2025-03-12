@@ -1,10 +1,11 @@
 package dev.treppmann.deepnote.notes;
 
+import dev.treppmann.deepnote.notes.repository.FolderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import dev.treppmann.deepnote.notes.Folder;
+import dev.treppmann.deepnote.notes.model.Folder;
 
 import java.util.UUID;
 

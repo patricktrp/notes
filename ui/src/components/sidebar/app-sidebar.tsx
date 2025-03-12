@@ -2,13 +2,18 @@ import * as React from "react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/services/axios-instance";
+import { Button } from "@/components/ui/button";
+import { NavLink } from "react-router";
 import {
   ChevronRight,
   File,
+  SquarePen,
   Folder,
   Sparkles,
   Search,
+  ChevronsDownUp,
   BrainCircuit,
+  ArrowUpNarrowWide,
   Settings,
 } from "lucide-react";
 import {
@@ -32,15 +37,11 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { NavMain } from "@/components/sidebar/nav-main";
-import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { useFolderTree } from "@/hooks/use-folder-tree";
 import SidebarNoteItem from "./sidebar-note-item";
 import { NoteOverview } from "@/types/types";
 import SidebarFolderItem from "./sidebar-folder-item";
-import DroppableFolder from "./sidebar-folder-item";
-import { useMoveNote } from "@/hooks/use-move-note";
-import { moveNote } from "@/services/api";
 
 const navData = {
   user: {
@@ -117,6 +118,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Notes</SidebarGroupLabel>
+          <SidebarMenu>
+            <div className="flex gap-y-3  ">
+              <Button variant={"ghost"}>
+                <SquarePen className="size-4" />
+              </Button>
+              <Button variant={"ghost"}>
+                <Folder className="size-4" />
+              </Button>
+              <Button variant={"ghost"}>
+                <ArrowUpNarrowWide className="size-4" />
+              </Button>
+              <Button variant={"ghost"}>
+                <ChevronsDownUp className="size-4" />
+              </Button>
+            </div>
+          </SidebarMenu>
           <SidebarGroupContent>
             <DndContext onDragEnd={handleDragEnd}>
               <SidebarMenu>
@@ -179,6 +196,7 @@ function Tree({ item }: any) {
               ))}
               {item.notes.map((note: NoteOverview) => (
                 <SidebarNoteItem note={note} />
+
                 // <SidebarMenuButton
                 //   key={note.id}
                 //   // isActive={name === "button.tsx"}

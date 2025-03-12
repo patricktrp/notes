@@ -1,5 +1,10 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.service;
 
+import dev.treppmann.deepnote.notes.dto.*;
+import dev.treppmann.deepnote.notes.model.Folder;
+import dev.treppmann.deepnote.notes.model.Note;
+import dev.treppmann.deepnote.notes.repository.FolderRepository;
+import dev.treppmann.deepnote.notes.repository.NoteRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,14 @@ public class NoteService {
     public NoteService(FolderRepository folderRepository, NoteRepository noteRepository) {
         this.folderRepository = folderRepository;
         this.noteRepository = noteRepository;
+    }
+
+    public NoteDTO getNoteById(UUID userId, Integer noteId) {
+        Note note = noteRepository.findByIdAndUserId(noteId, userId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found")
+        );
+
+        return new NoteDTO(note.getId(), note.getName(), note.getContent(), note.getCreatedAt(), note.getUpdatedAt());
     }
 
     public void createNote(UUID userId, CreateNoteRequest createNoteRequest) {
@@ -134,10 +147,10 @@ public class NoteService {
                 FolderDTO folderDTO = folderMap.get(folderId);
                 if (folderDTO != null) {
                     // Add the note to the list of notes for the folder
-                    folderDTO.notes().add(new NoteOverviewDTO(note.getId(), note.getName()));
+                    folderDTO.notes().add(new NoteOverviewDTO(note.getId(), note.getName(), note.getCreatedAt(), note.getUpdatedAt()));
                 }
             } else {
-                folderTreeDTO.notes().add(new NoteOverviewDTO(note.getId(), note.getName()));
+                folderTreeDTO.notes().add(new NoteOverviewDTO(note.getId(), note.getName(), note.getCreatedAt(), note.getUpdatedAt()));
             }
         }
 

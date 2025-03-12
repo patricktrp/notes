@@ -1,5 +1,6 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.repository;
 
+import dev.treppmann.deepnote.notes.model.Folder;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

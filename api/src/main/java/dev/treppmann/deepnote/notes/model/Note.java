@@ -1,4 +1,4 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,6 +39,9 @@ public class Note {
     @ColumnDefault("now()")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Column(name = "content", length = Integer.MAX_VALUE)
+    private String content;
 
     @PrePersist
     public void prePersist() {

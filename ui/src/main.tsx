@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<NothingSelected />} />
-            <Route path="notes/:noteId" element={<Note />} />
+            <Route path="/notes/:noteId" element={<Note />} />
           </Route>
         </Routes>
       </BrowserRouter>

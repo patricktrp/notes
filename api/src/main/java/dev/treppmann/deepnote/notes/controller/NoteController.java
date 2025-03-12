@@ -1,5 +1,8 @@
-package dev.treppmann.deepnote.notes;
+package dev.treppmann.deepnote.notes.controller;
 
+import dev.treppmann.deepnote.notes.service.NoteService;
+import dev.treppmann.deepnote.notes.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -9,6 +12,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
+@Slf4j
 public class NoteController {
     private final NoteService noteService;
 
@@ -19,6 +23,11 @@ public class NoteController {
     @GetMapping("/folders/tree")
     public FolderTreeDTO getFolderTree(Principal principal) {
         return noteService.getFolderTree(mapUserIdToUUID(principal.getName()));
+    }
+
+    @GetMapping("/notes/{noteId}")
+    public NoteDTO getNoteById(Principal principal, @PathVariable Integer noteId) {
+        return noteService.getNoteById(mapUserIdToUUID(principal.getName()), noteId);
     }
 
     @PostMapping("/notes")
@@ -35,7 +44,6 @@ public class NoteController {
 
     @PutMapping("/notes/{noteId}/move")
     public void moveNote(Principal principal, @PathVariable Integer noteId, @RequestBody @Valid MoveNoteRequest moveNoteRequest) {
-        System.out.println("Moving note " + noteId + " to " + principal.getName());
         noteService.moveNote(mapUserIdToUUID(principal.getName()), noteId, moveNoteRequest);
     }
 
