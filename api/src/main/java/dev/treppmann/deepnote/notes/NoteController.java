@@ -19,4 +19,9 @@ public class NoteController {
     public FolderTreeDTO getFolderTree(Principal principal) {
         return noteService.getFolderTree(principal.getName());
     }
+
+    @GetMapping
+    public void moveNote(Principal principal) {
+        noteService.moveFolder(principal.getName(), 4, 6);
+    }
 }

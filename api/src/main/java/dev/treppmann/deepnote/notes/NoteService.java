@@ -1,7 +1,9 @@
 package dev.treppmann.deepnote.notes;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -16,11 +18,50 @@ public class NoteService {
         this.noteRepository = noteRepository;
     }
 
+    public void moveNote(String userId, Integer noteId, Integer newFolderId) {
+        UUID userUUID;
+        try {
+            userUUID = UUID.fromString(userId);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format");
+        }
+
+        Note note = noteRepository.findByIdAndUserId(noteId, userUUID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found or does not belong to the user"));
+
+        Folder folder = folderRepository.findByIdAndUserId(newFolderId, userUUID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found or does not belong to the user"));
+
+        note.setFolder(folder);
+        noteRepository.save(note);
+    }
+
+    public void moveFolder(String userId, Integer folderId, Integer newParentFolderId) {
+        UUID userUUID;
+        try {
+            userUUID = UUID.fromString(userId);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format");
+        }
+
+        Folder folder = folderRepository.findByIdAndUserId(folderId, userUUID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found or does not belong to the user"));
+
+        Folder newParentFolder = folderRepository.findByIdAndUserId(newParentFolderId, userUUID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target parent folder not found or does not belong to the user"));
+
+        if (folder.getParentFolder() != null && folder.getParentFolder().getId().equals(newParentFolderId)) {
+            return;
+        }
+
+        folder.setParentFolder(newParentFolder);
+        folderRepository.save(folder);
+    }
+
     public FolderTreeDTO getFolderTree(String userId) {
         UUID uuid = UUID.fromString(userId);
         List<Folder> folders = folderRepository.findAllByUserId(uuid);
         List<Note> notes = noteRepository.findAllByUserId(uuid);
-
         return buildFolderTree(folders, notes);
     }
 

@@ -26,11 +26,27 @@ import {
   SidebarMenuSub,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import {
+  ContextMenu,
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { NavUser } from "@/components/sidebar/nav-user";
+import { useFolderTree } from "@/hooks/use-folder-tree";
 
-const data = {
+const navData = {
   user: {
     name: "Patrick Treppmann",
     email: "patrick@treppmann.dev",
@@ -50,83 +66,6 @@ const data = {
       shortcut: "A",
     },
   ],
-  tree: [
-    [
-      "app",
-      [
-        "api",
-        ["hello", ["route.ts"]],
-        "page.tsx",
-        "layout.tsx",
-        ["blog", ["page.tsx"]],
-      ],
-    ],
-    [
-      "components",
-      ["ui", "button.tsx", "card.tsx"],
-      "header.tsx",
-      "footer.tsx",
-    ],
-    ["lib", ["util.ts"]],
-    ["public", "favicon.ico", "vercel.svg"],
-    "README.md",
-  ],
-  newTree: {
-    folders: [
-      {
-        id: 1,
-        name: "Test",
-        folders: [
-          {
-            id: 4,
-            name: "Test 4",
-            folders: [
-              {
-                id: 5,
-                name: "Test 5",
-                folders: [],
-                notes: [
-                  {
-                    id: 4,
-                    title: "Testo",
-                  },
-                ],
-              },
-            ],
-            notes: [],
-          },
-        ],
-        notes: [],
-      },
-      {
-        id: 2,
-        name: "Test 2",
-        folders: [],
-        notes: [],
-      },
-      {
-        id: 3,
-        name: "Test 3",
-        folders: [],
-        notes: [
-          {
-            id: 3,
-            title: "Second Note",
-          },
-        ],
-      },
-    ],
-    notes: [
-      {
-        id: 1,
-        title: "First Note",
-      },
-      {
-        id: 2,
-        title: "Second Note",
-      },
-    ],
-  },
   navSecondary: [
     {
       title: "Settings",
@@ -137,6 +76,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data, isLoading } = useFolderTree();
+  console.log(data);
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -155,16 +96,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <NavMain items={data.navMain} />
+        <NavMain items={navData.navMain} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Notes</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.tree.map((item, index) => (
+              {!isLoading && <Tree item={data} />}
+              {/* {data.newTree.folders.map((item, index) => (
                 <Tree key={index} item={item} />
               ))}
+              {data.newTree.notes.map((note) => (
+                <SidebarMenuButton
+                  key={note.id}
+                  // isActive={name === "button.tsx"}
+                  className="data-[active=true]:bg-transparent"
+                >
+                  <File />
+                  {note.title}
+                </SidebarMenuButton>
+              ))} */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -177,40 +129,57 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 }
 
-function Tree({ item }: { item: string | any[] }) {
-  const [name, ...items] = Array.isArray(item) ? item : [item];
-  if (!items.length) {
-    return (
-      <SidebarMenuButton
-        // isActive={name === "button.tsx"}
-        className="data-[active=true]:bg-transparent"
-      >
-        <File />
-        {name}
-      </SidebarMenuButton>
-    );
-  }
+function Tree({ item }: any) {
   return (
     <SidebarMenuItem>
-      <Collapsible
-        className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-        // defaultOpen={name === "components" || name === "ui"}
-      >
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton>
-            <ChevronRight className="transition-transform" />
-            <Folder />
-            {name}
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {items.map((subItem, index) => (
-              <Tree key={index} item={subItem} />
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
+      {item.id ? (
+        <Collapsible
+          className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+          // defaultOpen={name === "components" || name === "ui"}
+        >
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton>
+              <ChevronRight className="transition-transform" />
+              <Folder />
+              {item.name}
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              {item.folders.map((subfolder) => (
+                <Tree key={subfolder.id} item={subfolder} />
+              ))}
+              {item.notes.map((note) => (
+                <SidebarMenuButton
+                  key={note.id}
+                  // isActive={name === "button.tsx"}
+                  className="data-[active=true]:bg-transparent"
+                >
+                  <File />
+                  {note.title}
+                </SidebarMenuButton>
+              ))}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <>
+          {item.folders.map((subfolder) => (
+            <Tree key={subfolder.id} item={subfolder} />
+          ))}
+          {item.notes.map((note) => (
+            <SidebarMenuButton
+              key={note.id}
+              // isActive={name === "button.tsx"}
+              className="data-[active=true]:bg-transparent"
+            >
+              <File />
+              {note.title}
+            </SidebarMenuButton>
+          ))}
+        </>
+      )}
     </SidebarMenuItem>
   );
 }
