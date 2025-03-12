@@ -1,4 +1,7 @@
 import * as React from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "@/services/axios-instance";
 import {
   ChevronRight,
   File,
@@ -13,10 +16,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarRail,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
@@ -26,25 +31,16 @@ import {
   SidebarMenuSub,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import {
-  ContextMenu,
-  ContextMenuCheckboxItem,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuRadioGroup,
-  ContextMenuRadioItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { useFolderTree } from "@/hooks/use-folder-tree";
+import SidebarNoteItem from "./sidebar-note-item";
+import { NoteOverview } from "@/types/types";
+import SidebarFolderItem from "./sidebar-folder-item";
+import DroppableFolder from "./sidebar-folder-item";
+import { useMoveNote } from "@/hooks/use-move-note";
+import { moveNote } from "@/services/api";
 
 const navData = {
   user: {
@@ -77,7 +73,27 @@ const navData = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading } = useFolderTree();
-  console.log(data);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (info) => {
+      return apiClient.put(`/notes/${info.noteId}/move`, {
+        folderId: info.folderId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries("folderTree");
+    },
+  });
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    if (!event.over) return;
+    console.log(event);
+    const folderId = event.over.id;
+    const noteId = event.active.id;
+    mutation.mutate({ noteId: noteId, folderId: folderId });
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -102,26 +118,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Notes</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {!isLoading && <Tree item={data} />}
-              {/* {data.newTree.folders.map((item, index) => (
+            <DndContext onDragEnd={handleDragEnd}>
+              <SidebarMenu>
+                {!isLoading && <Tree item={data} />}
+                {/* TODO: ADD LOADER */}
+                {/* {data.newTree.folders.map((item, index) => (
                 <Tree key={index} item={item} />
-              ))}
-              {data.newTree.notes.map((note) => (
-                <SidebarMenuButton
+                ))}
+                {data.newTree.notes.map((note) => (
+                  <SidebarMenuButton
                   key={note.id}
                   // isActive={name === "button.tsx"}
                   className="data-[active=true]:bg-transparent"
-                >
+                  >
                   <File />
                   {note.title}
-                </SidebarMenuButton>
-              ))} */}
-            </SidebarMenu>
+                  </SidebarMenuButton>
+                  ))} */}
+              </SidebarMenu>
+            </DndContext>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      {/* <SidebarRail /> */}
+      <SidebarRail />
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
@@ -130,35 +149,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Tree({ item }: any) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => !prev); // Toggle collapse state
+  };
+
   return (
     <SidebarMenuItem>
       {item.id ? (
         <Collapsible
+          open={!isCollapsed}
           className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
           // defaultOpen={name === "components" || name === "ui"}
         >
-          <CollapsibleTrigger asChild>
-            <SidebarMenuButton>
-              <ChevronRight className="transition-transform" />
-              <Folder />
-              {item.name}
-            </SidebarMenuButton>
-          </CollapsibleTrigger>
+          <SidebarFolderItem folder={item} toggleCollapse={toggleCollapse} />
+          {/* <CollapsibleTrigger className="w-full" asChild> */}
+          {/* <SidebarMenuButton onClick={toggleCollapse}>
+            <ChevronRight className="transition-transform" />
+            <Folder />
+            {item.name}
+          </SidebarMenuButton> */}
+          {/* </CollapsibleTrigger> */}
 
           <CollapsibleContent>
             <SidebarMenuSub>
               {item.folders.map((subfolder) => (
                 <Tree key={subfolder.id} item={subfolder} />
               ))}
-              {item.notes.map((note) => (
-                <SidebarMenuButton
-                  key={note.id}
-                  // isActive={name === "button.tsx"}
-                  className="data-[active=true]:bg-transparent"
-                >
-                  <File />
-                  {note.title}
-                </SidebarMenuButton>
+              {item.notes.map((note: NoteOverview) => (
+                <SidebarNoteItem note={note} />
+                // <SidebarMenuButton
+                //   key={note.id}
+                //   // isActive={name === "button.tsx"}
+                //   className="data-[active=true]:bg-transparent"
+                // >
+                //   <File />
+                //   {note.title}
+                // </SidebarMenuButton>
               ))}
             </SidebarMenuSub>
           </CollapsibleContent>
@@ -168,15 +196,16 @@ function Tree({ item }: any) {
           {item.folders.map((subfolder) => (
             <Tree key={subfolder.id} item={subfolder} />
           ))}
-          {item.notes.map((note) => (
-            <SidebarMenuButton
-              key={note.id}
-              // isActive={name === "button.tsx"}
-              className="data-[active=true]:bg-transparent"
-            >
-              <File />
-              {note.title}
-            </SidebarMenuButton>
+          {item.notes.map((note: NoteOverview) => (
+            <SidebarNoteItem note={note} />
+            // <SidebarMenuButton
+            //   key={note.id}
+            //   // isActive={name === "button.tsx"}
+            //   className="data-[active=true]:bg-transparent"
+            // >
+            //   <File />
+            //   {note.title}
+            // </SidebarMenuButton>
           ))}
         </>
       )}

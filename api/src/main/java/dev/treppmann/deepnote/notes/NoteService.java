@@ -18,50 +18,79 @@ public class NoteService {
         this.noteRepository = noteRepository;
     }
 
-    public void moveNote(String userId, Integer noteId, Integer newFolderId) {
-        UUID userUUID;
-        try {
-            userUUID = UUID.fromString(userId);
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format");
+    public void createNote(UUID userId, CreateNoteRequest createNoteRequest) {
+        Note note = new Note();
+        note.setUserId(userId);
+        note.setName(generateUniqueName(userId, "New Note"));
+
+        if (createNoteRequest.folderId() == null) {
+            note.setFolder(null);
+        } else {
+            Folder folder = folderRepository.findByIdAndUserId(createNoteRequest.folderId(), userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            note.setFolder(folder);
         }
 
-        Note note = noteRepository.findByIdAndUserId(noteId, userUUID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found or does not belong to the user"));
-
-        Folder folder = folderRepository.findByIdAndUserId(newFolderId, userUUID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found or does not belong to the user"));
-
-        note.setFolder(folder);
         noteRepository.save(note);
     }
 
-    public void moveFolder(String userId, Integer folderId, Integer newParentFolderId) {
-        UUID userUUID;
-        try {
-            userUUID = UUID.fromString(userId);
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format");
+    public void deleteNoteById(UUID userId, Integer noteId) {
+        Note note = noteRepository.findByIdAndUserId(noteId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!note.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        Folder folder = folderRepository.findByIdAndUserId(folderId, userUUID)
+        noteRepository.delete(note);
+    }
+
+    public void deleteFolderById(UUID userId, Integer noteId) {
+        Folder folder = folderRepository.findByIdAndUserId(noteId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!folder.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        folderRepository.delete(folder);
+    }
+
+    public void moveNote(UUID userId, Integer noteId, MoveNoteRequest moveNoteRequest) {
+        Note note = noteRepository.findByIdAndUserId(noteId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found or does not belong to the user"));
+
+        if (moveNoteRequest.folderId() == null) {
+            note.setFolder(null);
+        } else {
+            Folder folder = folderRepository.findByIdAndUserId(moveNoteRequest.folderId(), userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found or does not belong to the user"));
+            note.setFolder(folder);
+        }
+
+        noteRepository.save(note);
+    }
+
+    public void moveFolder(UUID userId, Integer folderId, MoveFolderRequest moveFolderRequest) {
+        Folder folder = folderRepository.findByIdAndUserId(folderId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found or does not belong to the user"));
 
-        Folder newParentFolder = folderRepository.findByIdAndUserId(newParentFolderId, userUUID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target parent folder not found or does not belong to the user"));
+        if (moveFolderRequest.folderId() == null) {
+            folder.setParentFolder(null);
+        } else {
+            Folder newParentFolder = folderRepository.findByIdAndUserId(moveFolderRequest.folderId(), userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target parent folder not found or does not belong to the user"));
 
-        if (folder.getParentFolder() != null && folder.getParentFolder().getId().equals(newParentFolderId)) {
-            return;
+            if (folder.getParentFolder() != null && folder.getParentFolder().getId().equals(moveFolderRequest.folderId())) {
+                return;
+            }
+
+            folder.setParentFolder(newParentFolder);
         }
 
-        folder.setParentFolder(newParentFolder);
         folderRepository.save(folder);
     }
 
-    public FolderTreeDTO getFolderTree(String userId) {
-        UUID uuid = UUID.fromString(userId);
-        List<Folder> folders = folderRepository.findAllByUserId(uuid);
-        List<Note> notes = noteRepository.findAllByUserId(uuid);
+    public FolderTreeDTO getFolderTree(UUID userId) {
+        List<Folder> folders = folderRepository.findAllByUserId(userId);
+        List<Note> notes = noteRepository.findAllByUserId(userId);
         return buildFolderTree(folders, notes);
     }
 
@@ -113,5 +142,16 @@ public class NoteService {
         }
 
         return folderTreeDTO;
+    }
+
+    private String generateUniqueName(UUID userId, String baseName) {
+        List<Note> existingNotes = noteRepository.findByUserIdAndNameStartingWith(userId, baseName);
+        int count = existingNotes.size();
+
+        if (count > 0) {
+            return baseName + " (" + count + ")";
+        }
+
+        return baseName;
     }
 }

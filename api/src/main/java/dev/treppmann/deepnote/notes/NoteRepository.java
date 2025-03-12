@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface NoteRepository extends JpaRepository<Note, Integer> {
     List<Note> findAllByUserId(UUID uuid);
     Optional<Note> findByIdAndUserId(Integer noteId, UUID userId);
+    List<Note> findByUserIdAndNameStartingWith(UUID userId, String name);
 }
