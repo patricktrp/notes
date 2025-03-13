@@ -3,10 +3,14 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/services/axios-instance";
 import { Button } from "@/components/ui/button";
-import { NavLink } from "react-router";
+
 import {
-  ChevronRight,
-  File,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   SquarePen,
   Folder,
   Sparkles,
@@ -16,11 +20,7 @@ import {
   ArrowUpNarrowWide,
   Settings,
 } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import {
   Sidebar,
@@ -29,6 +29,7 @@ import {
   SidebarRail,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarSeparator,
   SidebarMenu,
   SidebarHeader,
   SidebarMenuButton,
@@ -42,6 +43,9 @@ import { useFolderTree } from "@/hooks/use-folder-tree";
 import SidebarNoteItem from "./sidebar-note-item";
 import { NoteOverview } from "@/types/types";
 import SidebarFolderItem from "./sidebar-folder-item";
+import { createNote } from "@/services/api";
+import { useCreateNote } from "@/hooks/use-create-note";
+import { useCreateFolder } from "@/hooks/use-create-folder";
 
 const navData = {
   user: {
@@ -74,6 +78,8 @@ const navData = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading } = useFolderTree();
+  const createNoteMutation = useCreateNote();
+  const createFolderMutation = useCreateFolder();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -117,21 +123,49 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Notes</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>Notes</SidebarGroupLabel> */}
+          <SidebarSeparator className="mx-0" />
           <SidebarMenu>
-            <div className="flex gap-y-3  ">
-              <Button variant={"ghost"}>
-                <SquarePen className="size-4" />
-              </Button>
-              <Button variant={"ghost"}>
-                <Folder className="size-4" />
-              </Button>
-              <Button variant={"ghost"}>
-                <ArrowUpNarrowWide className="size-4" />
-              </Button>
-              <Button variant={"ghost"}>
-                <ChevronsDownUp className="size-4" />
-              </Button>
+            <div className="flex mt-1 gap-x-1 items-center justify-center">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      onClick={() => createNoteMutation.mutate()}
+                    >
+                      <SquarePen className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>New Note</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      onClick={() => createFolderMutation.mutate()}
+                    >
+                      <Folder className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>New Folder</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Button variant={"ghost"}>
+                  <ArrowUpNarrowWide className="size-4" />
+                </Button>
+                <Button variant={"ghost"}>
+                  <ChevronsDownUp className="size-4" />
+                </Button>
+                <Button variant={"ghost"}>
+                  <ChevronsDownUp className="size-4" />
+                </Button>
+              </TooltipProvider>
             </div>
           </SidebarMenu>
           <SidebarGroupContent>
@@ -195,7 +229,7 @@ function Tree({ item }: any) {
                 <Tree key={subfolder.id} item={subfolder} />
               ))}
               {item.notes.map((note: NoteOverview) => (
-                <SidebarNoteItem note={note} />
+                <SidebarNoteItem note={note} key={note.id} />
 
                 // <SidebarMenuButton
                 //   key={note.id}
@@ -215,7 +249,7 @@ function Tree({ item }: any) {
             <Tree key={subfolder.id} item={subfolder} />
           ))}
           {item.notes.map((note: NoteOverview) => (
-            <SidebarNoteItem note={note} />
+            <SidebarNoteItem note={note} key={note.id} />
             // <SidebarMenuButton
             //   key={note.id}
             //   // isActive={name === "button.tsx"}

@@ -99,19 +99,17 @@ const data = [
   ],
 ];
 
-export function NavActions() {
+export function NavActions({ note }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     setIsOpen(true);
   }, []);
 
-  const updatedAt = "2025-03-12T13:44:06.714977Z";
-
   return (
     <div className="flex items-center gap-2 text-sm">
       <div className="hidden font-medium text-muted-foreground md:inline-block">
-        Edit {formatDate(updatedAt)}
+        Edit {formatDate(note?.updatedAt)}
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7">
         <Star />

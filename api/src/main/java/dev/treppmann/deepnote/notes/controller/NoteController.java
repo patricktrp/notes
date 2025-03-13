@@ -32,14 +32,14 @@ public class NoteController {
 
     @PostMapping("/notes")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createNote(Principal principal, @RequestBody @Valid CreateNoteRequest createNoteRequest) {
-        noteService.createNote(mapUserIdToUUID(principal.getName()), createNoteRequest);
+    public NoteDTO createNote(Principal principal, @RequestBody @Valid CreateNoteRequest createNoteRequest) {
+        return noteService.createNote(mapUserIdToUUID(principal.getName()), createNoteRequest);
     }
 
     @PostMapping("/folders")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createFolder(Principal principal) {
-
+    public FolderDTO createFolder(Principal principal, CreateFolderRequest createFolderRequest) {
+        return noteService.createFolder(mapUserIdToUUID(principal.getName()), createFolderRequest);
     }
 
     @PutMapping("/notes/{noteId}/move")

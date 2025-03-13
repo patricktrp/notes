@@ -31,10 +31,10 @@ public class NoteService {
         return new NoteDTO(note.getId(), note.getName(), note.getContent(), note.getCreatedAt(), note.getUpdatedAt());
     }
 
-    public void createNote(UUID userId, CreateNoteRequest createNoteRequest) {
+    public NoteDTO createNote(UUID userId, CreateNoteRequest createNoteRequest) {
         Note note = new Note();
         note.setUserId(userId);
-        note.setName(generateUniqueName(userId, "New Note"));
+        note.setName(generateUniqueNoteName(userId));
 
         if (createNoteRequest.folderId() == null) {
             note.setFolder(null);
@@ -44,6 +44,23 @@ public class NoteService {
         }
 
         noteRepository.save(note);
+        return new NoteDTO(note.getId(), note.getName(), note.getContent(), note.getCreatedAt(), note.getUpdatedAt());
+    }
+
+    public FolderDTO createFolder(UUID userId, CreateFolderRequest createFolderRequest) {
+        Folder folder = new Folder();
+        folder.setUserId(userId);
+        folder.setName(generateUniqueFolderName(userId));
+
+        if (createFolderRequest.folderId() == null) {
+            folder.setParentFolder(null);
+        } else {
+            Folder parent = folderRepository.findByIdAndUserId(createFolderRequest.folderId(), userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            folder.setParentFolder(parent);
+        }
+
+        folderRepository.save(folder);
+        return new FolderDTO(folder.getId(), folder.getName(), List.of(), List.of());
     }
 
     public void deleteNoteById(UUID userId, Integer noteId) {
@@ -157,9 +174,22 @@ public class NoteService {
         return folderTreeDTO;
     }
 
-    private String generateUniqueName(UUID userId, String baseName) {
+    private String generateUniqueNoteName(UUID userId) {
+        String baseName = "New Note";
         List<Note> existingNotes = noteRepository.findByUserIdAndNameStartingWith(userId, baseName);
         int count = existingNotes.size();
+
+        if (count > 0) {
+            return baseName + " (" + count + ")";
+        }
+
+        return baseName;
+    }
+
+    private String generateUniqueFolderName(UUID userId) {
+        String baseName = "New Folder";
+        List<Folder> existingFolders = folderRepository.findByUserIdAndNameStartingWith(userId, baseName);
+        int count = existingFolders.size();
 
         if (count > 0) {
             return baseName + " (" + count + ")";

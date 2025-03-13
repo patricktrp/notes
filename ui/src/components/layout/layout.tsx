@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet } from "react-router";
 import { SettingsDialog } from "@/components/features/settings/settings-dialog";
+import SearchDialog from "@/components/search-dialog";
 
 export default function Layout() {
   return (
@@ -16,6 +17,7 @@ export default function Layout() {
       </SidebarProvider>
 
       <SettingsDialog />
+      <SearchDialog />
     </>
   );
 }
