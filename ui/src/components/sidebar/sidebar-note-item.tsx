@@ -3,6 +3,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { File } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { NavLink } from "react-router";
+import NoteContextMenu from "./note-context-menu";
 
 type SidebarNoteItemProps = {
   note: NoteOverview;
@@ -23,20 +24,22 @@ const SidebarNoteItem = ({ note }: SidebarNoteItemProps) => {
   //   };
 
   return (
-    <NavLink to={`/notes/${note.id}`}>
-      <SidebarMenuButton
-        //   ref={setNodeRef}
-        //   {...listeners}
-        //   {...attributes}
-        //   style={style}
-        key={note.id}
-        // isActive={name === "button.tsx"}
-        className="data-[active=true]:bg-transparent"
-      >
-        <File />
-        {note.title}
-      </SidebarMenuButton>
-    </NavLink>
+    <NoteContextMenu note={note}>
+      <NavLink to={`/notes/${note.id}`}>
+        <SidebarMenuButton
+          //   ref={setNodeRef}
+          //   {...listeners}
+          //   {...attributes}
+          //   style={style}
+          key={note.id}
+          // isActive={name === "button.tsx"}
+          className="data-[active=true]:bg-transparent"
+        >
+          <File />
+          {note.title}
+        </SidebarMenuButton>
+      </NavLink>
+    </NoteContextMenu>
   );
 };
 

@@ -6,14 +6,22 @@ const fetchNoteById = async (noteId: number): Promise<Note> => {
   return res.data;
 };
 
-const createNote = async (): Promise<Note> => {
-  const res = await apiClient.post("/notes", { folderId: null });
+const createNote = async (folderId: number): Promise<Note> => {
+  const res = await apiClient.post("/notes", { folderId });
   return res.data;
 };
 
 const createFolder = async (): Promise<Note> => {
   const res = await apiClient.post("/folders", { folderId: null });
   return res.data;
+};
+
+const deleteNote = async (noteId: number) => {
+  const res = await apiClient.delete(`/notes/${noteId}`);
+};
+
+const deleteFolder = async (folderId: number) => {
+  const res = await apiClient.delete(`/folders/${folderId}`);
 };
 
 const fetchFolderTree = async () => {
@@ -47,6 +55,8 @@ export {
   fetchNoteById,
   createNote,
   createFolder,
+  deleteNote,
+  deleteFolder,
   fetchFolderTree,
   moveNote,
   moveFolder,

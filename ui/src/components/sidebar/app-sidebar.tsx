@@ -14,8 +14,10 @@ import {
   SquarePen,
   Folder,
   Sparkles,
+  Fullscreen,
   Search,
   ChevronsDownUp,
+  ChevronsUpDown,
   BrainCircuit,
   ArrowUpNarrowWide,
   Settings,
@@ -46,6 +48,8 @@ import SidebarFolderItem from "./sidebar-folder-item";
 import { createNote } from "@/services/api";
 import { useCreateNote } from "@/hooks/use-create-note";
 import { useCreateFolder } from "@/hooks/use-create-folder";
+import { f } from "node_modules/react-router/dist/development/fog-of-war-BALYJxf_.d.mts";
+import SortNoteDropdown from "./sort-note-dropdown";
 
 const navData = {
   user: {
@@ -81,6 +85,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const createNoteMutation = useCreateNote();
   const createFolderMutation = useCreateFolder();
   const queryClient = useQueryClient();
+  const [fullTreeExpanded, setIsFullTreeExpanded] = useState(false);
+
+  console.log(fullTreeExpanded);
+
+  const toggleAll = () => {
+    setIsFullTreeExpanded((prev) => !prev);
+    console.log(fullTreeExpanded);
+  };
 
   const mutation = useMutation({
     mutationFn: (info) => {
@@ -123,7 +135,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          {/* <SidebarGroupLabel>Notes</SidebarGroupLabel> */}
           <SidebarSeparator className="mx-0" />
           <SidebarMenu>
             <div className="flex mt-1 gap-x-1 items-center justify-center">
@@ -156,36 +167,48 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </TooltipContent>
                 </Tooltip>
 
+                <Tooltip>
+                  <TooltipTrigger>
+                    <SortNoteDropdown>
+                      <Button variant={"ghost"}>
+                        <ArrowUpNarrowWide className="size-4" />
+                      </Button>
+                    </SortNoteDropdown>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>Change Sorting</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button variant={"ghost"} onClick={toggleAll}>
+                      {fullTreeExpanded ? (
+                        <ChevronsDownUp className="size-4" />
+                      ) : (
+                        <ChevronsUpDown className="size-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{fullTreeExpanded ? "Collapse All" : "Expand All"}</p>
+                  </TooltipContent>
+                </Tooltip>
+
                 <Button variant={"ghost"}>
-                  <ArrowUpNarrowWide className="size-4" />
-                </Button>
-                <Button variant={"ghost"}>
-                  <ChevronsDownUp className="size-4" />
-                </Button>
-                <Button variant={"ghost"}>
-                  <ChevronsDownUp className="size-4" />
+                  <Fullscreen className="size-4" />
                 </Button>
               </TooltipProvider>
             </div>
           </SidebarMenu>
+          {/* <SidebarGroupLabel>Pinned Notes</SidebarGroupLabel> */}
+          <SidebarGroupLabel>All Notes</SidebarGroupLabel>
           <SidebarGroupContent>
             <DndContext onDragEnd={handleDragEnd}>
               <SidebarMenu>
-                {!isLoading && <Tree item={data} />}
-                {/* TODO: ADD LOADER */}
-                {/* {data.newTree.folders.map((item, index) => (
-                <Tree key={index} item={item} />
-                ))}
-                {data.newTree.notes.map((note) => (
-                  <SidebarMenuButton
-                  key={note.id}
-                  // isActive={name === "button.tsx"}
-                  className="data-[active=true]:bg-transparent"
-                  >
-                  <File />
-                  {note.title}
-                  </SidebarMenuButton>
-                  ))} */}
+                {!isLoading && (
+                  <Tree item={data} isAllExpanded={fullTreeExpanded} />
+                )}
               </SidebarMenu>
             </DndContext>
           </SidebarGroupContent>
@@ -199,11 +222,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 }
 
-function Tree({ item }: any) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+function Tree({ item, isAllExpanded }: { item: any; isAllExpanded: boolean }) {
+  const [isCollapsed, setIsCollapsed] = useState(!isAllExpanded);
 
   const toggleCollapse = () => {
-    setIsCollapsed((prev) => !prev); // Toggle collapse state
+    setIsCollapsed((prev) => !prev);
   };
 
   return (
@@ -212,33 +235,20 @@ function Tree({ item }: any) {
         <Collapsible
           open={!isCollapsed}
           className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-          // defaultOpen={name === "components" || name === "ui"}
         >
           <SidebarFolderItem folder={item} toggleCollapse={toggleCollapse} />
-          {/* <CollapsibleTrigger className="w-full" asChild> */}
-          {/* <SidebarMenuButton onClick={toggleCollapse}>
-            <ChevronRight className="transition-transform" />
-            <Folder />
-            {item.name}
-          </SidebarMenuButton> */}
-          {/* </CollapsibleTrigger> */}
 
           <CollapsibleContent>
             <SidebarMenuSub>
               {item.folders.map((subfolder) => (
-                <Tree key={subfolder.id} item={subfolder} />
+                <Tree
+                  key={subfolder.id}
+                  item={subfolder}
+                  isAllExpanded={isAllExpanded}
+                />
               ))}
               {item.notes.map((note: NoteOverview) => (
                 <SidebarNoteItem note={note} key={note.id} />
-
-                // <SidebarMenuButton
-                //   key={note.id}
-                //   // isActive={name === "button.tsx"}
-                //   className="data-[active=true]:bg-transparent"
-                // >
-                //   <File />
-                //   {note.title}
-                // </SidebarMenuButton>
               ))}
             </SidebarMenuSub>
           </CollapsibleContent>
@@ -246,18 +256,14 @@ function Tree({ item }: any) {
       ) : (
         <>
           {item.folders.map((subfolder) => (
-            <Tree key={subfolder.id} item={subfolder} />
+            <Tree
+              key={subfolder.id}
+              item={subfolder}
+              isAllExpanded={isAllExpanded}
+            />
           ))}
           {item.notes.map((note: NoteOverview) => (
             <SidebarNoteItem note={note} key={note.id} />
-            // <SidebarMenuButton
-            //   key={note.id}
-            //   // isActive={name === "button.tsx"}
-            //   className="data-[active=true]:bg-transparent"
-            // >
-            //   <File />
-            //   {note.title}
-            // </SidebarMenuButton>
           ))}
         </>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -14,10 +14,11 @@ import {
   Link,
   MoreHorizontal,
   Settings2,
-  Star,
+  Pin,
   Trash,
   Trash2,
 } from "lucide-react";
+import { Note } from "@/types/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -99,12 +100,8 @@ const data = [
   ],
 ];
 
-export function NavActions({ note }) {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, []);
+export function NavActions({ note }: { note: Note }) {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-2 text-sm">
@@ -112,7 +109,7 @@ export function NavActions({ note }) {
         Edit {formatDate(note?.updatedAt)}
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7">
-        <Star />
+        <Pin />
       </Button>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>

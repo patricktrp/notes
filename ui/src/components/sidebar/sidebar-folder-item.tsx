@@ -2,7 +2,7 @@ import { Folder } from "@/types/types";
 import { useDroppable } from "@dnd-kit/core";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ChevronRight, Folder as FolderIcon } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import FolderContextMenu from "./folder-context-menu";
 
 type SidebarFolderItemProps = {
   folder: Folder;
@@ -16,15 +16,17 @@ const SidebarFolderItem = ({
   const { setNodeRef, isOver } = useDroppable({ id: folder.id });
 
   return (
-    <SidebarMenuButton
-      onClick={toggleCollapse}
-      ref={setNodeRef}
-      className={isOver ? "bg-muted" : ""}
-    >
-      <ChevronRight className="transition-transform" />
-      <FolderIcon />
-      {folder.name}
-    </SidebarMenuButton>
+    <FolderContextMenu folder={folder}>
+      <SidebarMenuButton
+        onClick={toggleCollapse}
+        ref={setNodeRef}
+        className={isOver ? "bg-muted" : ""}
+      >
+        <ChevronRight className="transition-transform" />
+        <FolderIcon />
+        {folder.name}
+      </SidebarMenuButton>
+    </FolderContextMenu>
   );
 };
 
