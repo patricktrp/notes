@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import Keycloak from "keycloak-js";
+import { User } from "@/types/types";
 
 const keycloak = new Keycloak({
   url: "http://localhost:8088",
@@ -7,17 +8,11 @@ const keycloak = new Keycloak({
   clientId: "react-ui",
 });
 
-type UserData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
 type AuthStore = {
   keycloak: Keycloak;
   isAuthenticated: boolean;
   token: string | null;
-  user: UserData | null;
+  user: User | null;
   initAuth: () => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<void>;
@@ -52,7 +47,7 @@ export const useAuthStore = create<AuthStore>((set) => {
           const userInfo = await keycloak.loadUserInfo();
           console.log("User Info:", userInfo);
 
-          const mappedUser: UserData = {
+          const mappedUser: User = {
             firstName: userInfo["given_name"] || "",
             lastName: userInfo["family_name"] || "",
             email: userInfo["email"] || "",

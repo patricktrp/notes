@@ -21,3 +21,9 @@ export interface Folder {
   id: number;
   name: string;
 }
+
+export type User = {
+  firstName: string;
+  lastName: string;
+  email: string;
+};

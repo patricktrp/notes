@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronsUpDown, LogOut, Settings, Sparkles } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

@@ -1,7 +1,5 @@
 import * as React from "react";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import apiClient from "@/services/axios-instance";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -20,10 +18,9 @@ import {
   ChevronsUpDown,
   BrainCircuit,
   ArrowUpNarrowWide,
-  Settings,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { DndContext } from "@dnd-kit/core";
 import {
   Sidebar,
   SidebarContent,
@@ -69,48 +66,28 @@ const navData = {
       shortcut: "A",
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const createNoteMutation = useCreateNote();
-  const createFolderMutation = useCreateFolder();
-  const queryClient = useQueryClient();
   const [fullTreeExpanded, setIsFullTreeExpanded] = useState(false);
-
   const [sortOrder, setSortOrder] = useState<SortOrder>("ASC");
   const [sortBy, setSortBy] = useState<SortBy>("NAME");
+
   const { data, isLoading } = useFolderTree(sortBy, sortOrder);
+  const createNoteMutation = useCreateNote();
+  const createFolderMutation = useCreateFolder();
 
   const toggleAll = () => {
     setIsFullTreeExpanded((prev) => !prev);
-    console.log(fullTreeExpanded);
   };
 
-  const mutation = useMutation({
-    mutationFn: (info) => {
-      return apiClient.put(`/notes/${info.noteId}/move`, {
-        folderId: info.folderId,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries("folderTree");
-    },
-  });
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    if (!event.over) return;
-    console.log(event);
-    const folderId = event.over.id;
-    const noteId = event.active.id;
-    mutation.mutate({ noteId: noteId, folderId: folderId });
-  };
+  // const handleDragEnd = async (event: DragEndEvent) => {
+  //   if (!event.over) return;
+  //   console.log(event);
+  //   const folderId = event.over.id;
+  //   const noteId = event.active.id;
+  //   mutation.mutate({ noteId: noteId, folderId: folderId });
+  // };
 
   return (
     <Sidebar {...props}>
@@ -203,7 +180,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* <SidebarGroupLabel>Pinned Notes</SidebarGroupLabel> */}
           <SidebarGroupLabel>All Notes</SidebarGroupLabel>
           <SidebarGroupContent>
-            <DndContext onDragEnd={handleDragEnd}>
+            <DndContext onDragEnd={() => console.log("drag end")}>
               <SidebarMenu>
                 {!isLoading && (
                   <Tree item={data} isAllExpanded={fullTreeExpanded} />
