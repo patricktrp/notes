@@ -9,13 +9,13 @@ import { NoteOverview } from "@/types/types";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -72,14 +72,26 @@ const NoteContextMenu = ({
               delete this note?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeletionConfirmationDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmNoteDeletion}>Confirm</Button>
+          <DialogFooter className="flex flex-col items-center w-full gap-y-3">
+            <div className="flex items-center gap-x-2 w-full">
+              <Checkbox id="dontAskAgain" />
+              <label
+                htmlFor="dontAskAgain"
+                className="text-sm leading-none cursor-pointer"
+              >
+                Don't ask again
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end w-full gap-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeletionConfirmationDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={confirmNoteDeletion}>Confirm</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
