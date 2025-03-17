@@ -9,7 +9,7 @@ export const useCreateNote = () => {
   return useMutation({
     mutationFn: createNote,
     onSuccess: (newNote) => {
-      queryClient.invalidateQueries(["folderTree"]);
+      queryClient.invalidateQueries({ queryKey: ["folderTree"] });
       navigate(`/notes/${newNote.id}`);
     },
   });

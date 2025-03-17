@@ -1,3 +1,7 @@
+export type SortOrder = "ASC" | "DESC";
+
+export type SortBy = "NAME" | "CREATED_AT" | "UPDATED_AT";
+
 export interface Note {
   id: number;
   title: string;

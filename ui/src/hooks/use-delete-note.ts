@@ -9,8 +9,8 @@ export const useDeleteNote = () => {
 
   return useMutation({
     mutationFn: deleteNote,
-    onSuccess: (data, noteId) => {
-      queryClient.invalidateQueries(["folderTree"]);
+    onSuccess: (_, noteId) => {
+      queryClient.invalidateQueries({ queryKey: ["folderTree"] });
 
       if (location.pathname === `/notes/${noteId}`) {
         navigate("/");

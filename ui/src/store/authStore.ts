@@ -2,9 +2,9 @@ import { create } from "zustand";
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:8088", // Your Keycloak server URL
-  realm: "DeepNote", // The realm in Keycloak
-  clientId: "react-ui", // The client ID in Keycloak
+  url: "http://localhost:8088",
+  realm: "DeepNote",
+  clientId: "react-ui",
 });
 
 type UserData = {

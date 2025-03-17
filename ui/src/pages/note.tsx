@@ -30,7 +30,9 @@ const Note = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div className="ml-auto px-3">{<NavActions note={data} />}</div>
+        {data && (
+          <div className="ml-auto px-3">{<NavActions note={data} />}</div>
+        )}
       </header>
       <div className="p-4">{data?.content}</div>
     </div>

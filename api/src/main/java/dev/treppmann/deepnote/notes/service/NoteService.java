@@ -6,6 +6,7 @@ import dev.treppmann.deepnote.notes.model.Note;
 import dev.treppmann.deepnote.notes.repository.FolderRepository;
 import dev.treppmann.deepnote.notes.repository.NoteRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,6 +64,21 @@ public class NoteService {
         return new FolderDTO(folder.getId(), folder.getName(), List.of(), List.of());
     }
 
+    public NoteDTO updateNoteById(UUID userId, Integer noteId, UpdateNoteRequest updateNoteRequest) {
+        Note note = noteRepository.findByIdAndUserId(noteId, userId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found")
+        );
+
+        if (!note.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        // update the Note entity
+
+        noteRepository.save(note);
+        return new NoteDTO(note.getId(), note.getName(), note.getContent(), note.getCreatedAt(), note.getUpdatedAt());
+    }
+
     public void deleteNoteById(UUID userId, Integer noteId) {
         Note note = noteRepository.findByIdAndUserId(noteId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -118,9 +134,12 @@ public class NoteService {
         folderRepository.save(folder);
     }
 
-    public FolderTreeDTO getFolderTree(UUID userId) {
+    public FolderTreeDTO getFolderTree(UUID userId, SortBy sortBy, SortOrder sortOrder) {
         List<Folder> folders = folderRepository.findAllByUserId(userId);
-        List<Note> notes = noteRepository.findAllByUserId(userId);
+        Sort.Order order = sortOrder == SortOrder.ASC ?
+                Sort.Order.asc(SortBy.NAME.getField())
+                : Sort.Order.desc(SortBy.NAME.getField());
+        List<Note> notes = noteRepository.findAllByUserId(userId, Sort.by(order));
         return buildFolderTree(folders, notes);
     }
 

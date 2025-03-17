@@ -43,12 +43,10 @@ import { NavMain } from "@/components/sidebar/nav-main";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { useFolderTree } from "@/hooks/use-folder-tree";
 import SidebarNoteItem from "./sidebar-note-item";
-import { NoteOverview } from "@/types/types";
+import { NoteOverview, SortBy, SortOrder } from "@/types/types";
 import SidebarFolderItem from "./sidebar-folder-item";
-import { createNote } from "@/services/api";
 import { useCreateNote } from "@/hooks/use-create-note";
 import { useCreateFolder } from "@/hooks/use-create-folder";
-import { f } from "node_modules/react-router/dist/development/fog-of-war-BALYJxf_.d.mts";
 import SortNoteDropdown from "./sort-note-dropdown";
 
 const navData = {
@@ -81,13 +79,14 @@ const navData = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data, isLoading } = useFolderTree();
   const createNoteMutation = useCreateNote();
   const createFolderMutation = useCreateFolder();
   const queryClient = useQueryClient();
   const [fullTreeExpanded, setIsFullTreeExpanded] = useState(false);
 
-  console.log(fullTreeExpanded);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("ASC");
+  const [sortBy, setSortBy] = useState<SortBy>("NAME");
+  const { data, isLoading } = useFolderTree(sortBy, sortOrder);
 
   const toggleAll = () => {
     setIsFullTreeExpanded((prev) => !prev);

@@ -7,7 +7,7 @@ export const useCreateFolder = () => {
   return useMutation({
     mutationFn: createFolder,
     onSuccess: () => {
-      queryClient.invalidateQueries(["folderTree"]);
+      queryClient.invalidateQueries({ queryKey: ["folderTree"] });
     },
   });
 };

@@ -21,8 +21,9 @@ public class NoteController {
     }
 
     @GetMapping("/folders/tree")
-    public FolderTreeDTO getFolderTree(Principal principal) {
-        return noteService.getFolderTree(mapUserIdToUUID(principal.getName()));
+    public FolderTreeDTO getFolderTree(Principal principal, @RequestParam(required = false, defaultValue = "NAME") SortBy sortBy, @RequestParam(required = false, defaultValue = "ASC") SortOrder sortOrder) {
+        log.info("sortBy: {}, sortOrder: {}", sortBy, sortOrder);
+        return noteService.getFolderTree(mapUserIdToUUID(principal.getName()), sortBy, sortOrder);
     }
 
     @GetMapping("/notes/{noteId}")
@@ -50,6 +51,11 @@ public class NoteController {
     @PutMapping("/folders/{folderId}/move")
     public void moveFolder(Principal principal, @PathVariable Integer folderId, @RequestBody @Valid MoveFolderRequest moveFolderRequest) {
         noteService.moveFolder(mapUserIdToUUID(principal.getName()), folderId, moveFolderRequest);
+    }
+
+    @PutMapping("/notes/{noteId}")
+    public NoteDTO updateNoteById(Principal principal, @PathVariable Integer noteId, @RequestBody @Valid UpdateNoteRequest updateNoteRequest) {
+        return noteService.updateNoteById(mapUserIdToUUID(principal.getName()), noteId, updateNoteRequest);
     }
 
     @DeleteMapping("/notes/{noteId}")

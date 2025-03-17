@@ -1,5 +1,5 @@
 import apiClient from "./axios-instance";
-import { Note } from "@/types/types";
+import { Note, SortBy, SortOrder } from "@/types/types";
 
 const fetchNoteById = async (noteId: number): Promise<Note> => {
   const res = await apiClient.get(`/notes/${noteId}`);
@@ -24,8 +24,14 @@ const deleteFolder = async (folderId: number) => {
   const res = await apiClient.delete(`/folders/${folderId}`);
 };
 
-const fetchFolderTree = async () => {
-  const res = await apiClient.get("/folders/tree");
+const fetchFolderTree = async (sortBy: SortBy, sortOrder: SortOrder) => {
+  const res = await apiClient.get("/folders/tree", {
+    params: {
+      sortBy: "CREATED_AT",
+      sortOrder: "DESC",
+    },
+  });
+
   return res.data;
 };
 

@@ -7,7 +7,7 @@ export const useDeleteFolder = () => {
   return useMutation({
     mutationFn: deleteFolder,
     onSuccess: () => {
-      queryClient.invalidateQueries(["folderTree"]);
+      queryClient.invalidateQueries({ queryKey: ["folderTree"] });
     },
     onError: (error) => {
       console.error("Failed to delete note:", error);
